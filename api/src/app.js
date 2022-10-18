@@ -17,11 +17,7 @@ MongoClient.connect(process.env.MONGO_URI,{useNewUrlParser:true, useUnifiedTopol
 MongoClient.set('useFindAndModify', false);
 MongoClient.set('useCreateIndex', true);
 
-app.use(bodyParser.urlencoded({
-    extended:true,
-    limit: '10mb',
-    parameterLimit: 100000
-}));
+app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/',express.static('public'));
 

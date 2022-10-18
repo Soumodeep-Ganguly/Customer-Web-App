@@ -3,7 +3,7 @@ import { BASE_URL } from "../env";
 
 let instance
 
-const Axios = () => {
+const getAxiosInstance = () => {
     if(!instance) {
         instance = axios.create({
             baseURL: BASE_URL,
@@ -13,4 +13,4 @@ const Axios = () => {
     return instance
 }
 
-export default Axios
+export { getAxiosInstance }

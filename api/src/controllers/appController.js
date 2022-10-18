@@ -6,6 +6,7 @@ module.exports = {
     // Get Customer List
     selectCustomers: async function (req, res) {
         try {
+            let where = {}
             let sort = {}
             let limit = '10'
             let skip = '0'
@@ -19,10 +20,34 @@ module.exports = {
                 }
             }
             
-            let customers = await Customer.find({}).sort(sort).skip(parseInt(skip)).limit(parseInt(limit)).exec()
+            if (req.query.search && req.query.search != "") {
+                where["$or"] = [{
+                    firstName: {
+                            $regex: ".*" + req.query.search,
+                            $options: "i",
+                        }
+                }, { 
+                    lastName: {
+                            $regex: ".*" + req.query.search,
+                            $options: "i",
+                        }
+                }, { 
+                    userName: {
+                            $regex: ".*" + req.query.search,
+                            $options: "i",
+                        }
+                },{ 
+                    email: {
+                            $regex: ".*" + req.query.search,
+                            $options: "i",
+                        }
+                }];
+            }
+            
+            let customers = await Customer.find(where).sort(sort).skip(parseInt(skip)).limit(parseInt(limit)).exec()
             if(!customers) return res.status(404).send({ status: "error", message: "Could not get customers." })
             let count = 0
-            count = await Customer.find({}).countDocuments()
+            count = await Customer.find(where).countDocuments()
 
             res.send({ status: "success", message: "Customer list obtained successfully.", result: customers, count })
         } catch (e) {
@@ -37,7 +62,9 @@ module.exports = {
             let customer = await Customer.findOne({ _id: req.body.id })
             if(!customer) return res.status(404).send({ status: "error", message: "Could not get customer." })
 
-            res.send({ status: "success", message: "Customer obtained successfully.", result: customer })
+            let address = await Address.findOne({ customerId: req.body.id })
+
+            res.send({ status: "success", message: "Customer obtained successfully.", result: customer, address })
         } catch (e) {
             res.status(500).send({ status: "error", message: "Internal server error." })
         }
@@ -59,8 +86,9 @@ module.exports = {
             let savedAddress = await addressData.save();
             if(!savedAddress) return res.status(500).send({ status: "error", message: "Unable to save address." });
 
-            res.send({ status: "success", message: "Customer saved successfully." });
+            res.send({ status: "success", message: "Customer saved successfully.", result: savedCustomer });
         } catch (e) {
+            console.log(e);
             res.status(500).send({ status: "error", message: "Internal server error." })
         }
     },
@@ -72,7 +100,7 @@ module.exports = {
             let customer = await Customer.findOne(where)
             if(!customer) return res.status(404).send({ status: "error", message: "Customer not found." });
 
-            await Customer.findOneAndUpdate({ _id: req.body.id }, { $set: req.body.customer }, {
+            let newCustomer = await Customer.findOneAndUpdate({ _id: req.body.id }, { $set: req.body.customer }, {
                 new: true,
                 useFindAndModify: false,
                 upsert: false
@@ -84,7 +112,7 @@ module.exports = {
                 upsert: false
             })
 
-            res.send({ status: "success", message: "Customer saved successfully." });
+            res.send({ status: "success", message: "Customer saved successfully.", result: newCustomer });
         } catch (e) {
             res.status(500).send({ status: "error", message: "Internal server error." })
         }
