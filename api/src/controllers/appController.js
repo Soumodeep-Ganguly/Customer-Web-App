@@ -58,13 +58,11 @@ module.exports = {
     // Get Single Customer
     selectCustomerById: async function (req, res) {
         try {            
-            if(!req.body.id || req.body.id == "") return res.status(404).send({ status: "error", message: "Could not get customer." })
-            let customer = await Customer.findOne({ _id: req.body.id })
-            if(!customer) return res.status(404).send({ status: "error", message: "Could not get customer." })
+            if(!req.body.id || req.body.id == "") return res.status(404).send({ status: "error", message: "Could not get customer." })            
+            let address = await Address.findOne({ customerId: req.body.id }).populate('customerId')
+            if(!address) return res.status(404).send({ status: "error", message: "Could not get customer." })
 
-            let address = await Address.findOne({ customerId: req.body.id })
-
-            res.send({ status: "success", message: "Customer obtained successfully.", result: customer, address })
+            res.send({ status: "success", message: "Customer obtained successfully.", result: address.customerId, address })
         } catch (e) {
             res.status(500).send({ status: "error", message: "Internal server error." })
         }

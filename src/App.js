@@ -1,15 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { ThemeProvider, Container, Row, Col } from 'react-bootstrap'
+import Swal from 'sweetalert2'
 import CustomerModal from './components/CustomerModal';
 import Profile from './components/Profile';
 import SideNav from './components/SideNav';
 import TopNav from './components/TopNav';
 import { getAxiosInstance } from './utils/axios'
 
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer)
+      toast.addEventListener('mouseleave', Swal.resumeTimer)
+  }
+})
+
 function App() {
   const [customers, setCustomers] = useState([])
   const [totalCustomers, setTotalCustomers] = useState(0)
   const [perPage, setPerPage] = useState(10)
+  const [page, setPage] = useState(0)
   const [search, setSearch] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [modalType, setModalType] = useState("Add")
@@ -18,7 +33,7 @@ function App() {
 
   const getCustomers = async () => {
     try {
-      let { data } = await getAxiosInstance().get(`/selectCustomers?search=${search}&sortBy=${sortBy}`)
+      let { data } = await getAxiosInstance().get(`/selectCustomers?search=${search}&sortBy=${sortBy}&limit=${perPage}&skip=${page*perPage}`)
       console.log("DAT ",data)
       setCustomers(data.result)
       setTotalCustomers(data.count)
@@ -29,7 +44,7 @@ function App() {
 
   useEffect(() => {
     getCustomers()
-  }, [sortBy])
+  }, [sortBy, page])
 
   const handleClose = () => setShowModal(false)
   const handleOpen = (type) => {
@@ -53,6 +68,8 @@ function App() {
               sortBy={sortBy}
               setSortBy={setSortBy}
               pages={totalCustomers>0?Math.ceil(totalCustomers/perPage):1}
+              setPage={setPage}
+              page={page}
               setSearch={setSearch}
               search={search}
               searchCustomer={() => getCustomers()}
@@ -64,6 +81,7 @@ function App() {
               selectedCustomer={selectedCustomer}
               getAxiosInstance={getAxiosInstance}
               getCustomers={getCustomers}
+              Toast={Toast}
             />
           </Col>
         </Row>
@@ -76,6 +94,7 @@ function App() {
         onComplete={getCustomers}
         setSelectedCustomer={setSelectedCustomer}
         selectedCustomer={selectedCustomer}
+        Toast={Toast}
       />
     </ThemeProvider>
   );

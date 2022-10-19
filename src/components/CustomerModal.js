@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Row, Col, Modal, Button, FloatingLabel, Form } from 'react-bootstrap'
 import { MdDone, MdClear, MdBookmark } from "react-icons/md";
 
-export default function CustomerModal({ showModal, handleClose, type, getAxiosInstance, onComplete, selectedCustomer, setSelectedCustomer }) {
+export default function CustomerModal({ showModal, handleClose, type, getAxiosInstance, onComplete, selectedCustomer, setSelectedCustomer, Toast }) {
     const [step, setStep] = useState(0)
 
     // Customer Details
@@ -23,6 +23,19 @@ export default function CustomerModal({ showModal, handleClose, type, getAxiosIn
     const [zipCode, setZipCode] = useState("")
 
     const saveCustomer = async () => {
+        if(firstName.trim() === "") Toast.fire({ icon: 'error', title: "Customer first name required." })
+        if(lastName.trim() === "") Toast.fire({ icon: 'error', title: "Customer last name required." })
+        if(userName.trim() === "") Toast.fire({ icon: 'error', title: "Customer username required." })
+        if(email.trim() === "") Toast.fire({ icon: 'error', title: "Customer email required." })
+        if(phone === "") Toast.fire({ icon: 'error', title: "Customer phone number required." })
+        if(dateOfBirth === "") Toast.fire({ icon: 'error', title: "Customer date of birth required." })
+
+        if(addressData.trim() === "") Toast.fire({ icon: 'error', title: "Customer address required." })
+        if(city.trim() === "") Toast.fire({ icon: 'error', title: "Customer city required." })
+        if(state.trim() === "") Toast.fire({ icon: 'error', title: "Customer state required." })
+        if(country.trim() === "") Toast.fire({ icon: 'error', title: "Customer country required." })
+        if(zipCode === "") Toast.fire({ icon: 'error', title: "Customer zipcode required." })
+
         let customer = {
             firstName,  lastName, userName, email, phone, 
             dob: dateOfBirth, gender
@@ -39,6 +52,7 @@ export default function CustomerModal({ showModal, handleClose, type, getAxiosIn
         try {
             let { data } = await getAxiosInstance().post(link, params)
             // console.log("DAT ",data)
+            Toast.fire({ icon: 'success', title: `Customer data saved.` })
             cancelSave()
             onComplete()
             setSelectedCustomer(data.result)

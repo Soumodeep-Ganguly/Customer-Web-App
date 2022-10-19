@@ -15,3 +15,20 @@ code {
 button {
   border-radius: 0 !important;
 }
+
+#sortBy {
+  border: 0 !important;
+}
+
+.customerCard {
+  border: 0 !important;
+  line-height: 20px;
+  padding-bottom: 10px;
+  border-radius: 6px !important;
+  text-overflow: ellipsis;
+  transition: 0.3s ease-in-out;
+}
+
+.customerCard:hover {
+  box-shadow: 0 0 10px -6px;
+}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Table, Button, Row, Col, Card, Image } from "react-bootstrap";
-import { MdOutlinePhone, MdOutlinePermIdentity, MdMailOutline, MdOutlineEdit } from "react-icons/md";
+import { MdOutlinePhone, MdOutlinePermIdentity, MdMailOutline } from "react-icons/md";
+import Swal from 'sweetalert2'
 import { BsTrash } from "react-icons/bs";
 import { FiEdit } from "react-icons/fi";
 
-export default function Profile({ showModal, selectedCustomer, getAxiosInstance, getCustomers }) {
+export default function Profile({ showModal, selectedCustomer, getAxiosInstance, getCustomers, Toast }) {
     const [customer, setCustomer] = useState(null)
     const [address, setAddress] = useState(null)
 
@@ -20,14 +21,26 @@ export default function Profile({ showModal, selectedCustomer, getAxiosInstance,
     }
 
     const deleteCustomer = async () => {
-        try {
-            let { data } = await getAxiosInstance().post('/deleteCustomer', { id: selectedCustomer._id })
-            setCustomer(null)
-            setAddress(null)
-            getCustomers()
-        } catch (err) {
-            console.log('ERR ', err)
-        }
+        Swal.fire({
+            icon: 'warning',
+            title: 'Are you sure?',
+            html: '<h5>This customer details will be deleted?</h5>',
+            showCancelButton: true,
+            confirmButtonText: `Delete`,
+            confirmButtonColor: '#D14343',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    let { data } = await getAxiosInstance().post('/deleteCustomer', { id: selectedCustomer._id })
+                    Toast.fire({ icon: 'success', title: `Customer deleted successfully.` })
+                    setCustomer(null)
+                    setAddress(null)
+                    getCustomers()
+                } catch (err) {
+                    console.log('ERR ', err)
+                }
+            }
+        })
     }
 
     useEffect(() => {
@@ -39,7 +52,7 @@ export default function Profile({ showModal, selectedCustomer, getAxiosInstance,
 
     return (
         <>
-            {customer && <Row>
+            {customer && <Row style={{ overflowY: 'auto', height: '87vh' }}>
                 <Col md={12} className="mt-1">
                     <Card className="p-3">
                         <Row className="pt-4 pb-4 pl-3">
@@ -137,6 +150,11 @@ export default function Profile({ showModal, selectedCustomer, getAxiosInstance,
                         </Row>
                     </Card>
                 </Col>
+            </Row>}
+            {!customer && <Row style={{ height: '87vh' }}>
+                <h4 style={{ margin: 'auto', width: '100%', textAlign: 'center' }}>
+                    No Customer Selected
+                </h4>
             </Row>}
         </>
     )
